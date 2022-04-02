@@ -7,6 +7,16 @@
 
 using namespace std;
 
+void readFromConsole(char buffer[], int size)
+{
+    string temp;
+    cin >> temp;
+    for (int i = 0; i < size; i++)
+        buffer[i] = (i < temp.size()) ? temp[i] : ' ';
+    buffer[size - 1] = '\0';
+    cin.clear();
+}
+
 struct Alumno
 {
     char codigo[5];
@@ -16,6 +26,16 @@ struct Alumno
 
     int ciclo;
     float mensualidad;
+
+    void inputData()
+    {
+        readFromConsole((char *)this->codigo, 5);
+        readFromConsole((char *)this->nombre, 11);
+        readFromConsole((char *)this->apellidos, 20);
+        readFromConsole((char *)this->carrera, 15);
+        cin >> ciclo;
+        cin >> mensualidad;
+    }
 
     void printAlumno()
     {
@@ -38,6 +58,8 @@ struct Alumno
         for (auto i : carrera)
             cout << i;
         cout << endl;
+        cout << "Ciclo: " << ciclo << endl;
+        cout << "Mensualidad: " << mensualidad << endl;
     }
 };
 
@@ -58,37 +80,22 @@ istream &operator>>(istream &stream, Alumno &p)
 ostream &operator<<(ostream &stream, Alumno &p)
 {
     cout << "Begin \n";
-    stream.write((char *)&p, sizeof(Alumno));
-    /*
     stream.write((char *)&p.codigo, sizeof(p.codigo));
-    stream.write((char *)' ', 1);
     stream.write((char *)&p.nombre, sizeof(p.nombre));
-    stream.write((char *)' ', 1);
     stream.write((char *)&p.apellidos, sizeof(p.apellidos));
-    stream.write((char *)' ', 1);
     stream.write((char *)&p.carrera, sizeof(p.carrera));
-    stream.write((char *)' ', 1);
-    */
-    cout
-        << "end\n";
-    /*
-    stream << p.codigo << " ";
-    stream << p.nombre << " ";
-    stream << p.apellidos << " ";
-    stream << p.carrera << " ";
-    stream << "\n";
-    */
-    return stream;
-}
 
-void readFromConsole(char buffer[], int size)
-{
-    string temp;
-    cin >> temp;
-    for (int i = 0; i < size; i++)
-        buffer[i] = (i < temp.size()) ? temp[i] : ' ';
-    buffer[size - 1] = '\0';
-    cin.clear();
+    char ciclo_char[5];
+    sprintf(ciclo_char, "%d", p.ciclo);
+    stream.write((char *)&ciclo_char, 5);
+
+    char mensualidad_char[10];
+    snprintf(mensualidad_char, 10, "%f", p.mensualidad);
+    stream.write((char *)mensualidad_char, 10);
+
+    stream << "\n";
+    stream << flush;
+    return stream;
 }
 
 class FixedRecord
@@ -107,7 +114,7 @@ public:
         ifstream inFile;
         vector<Alumno> alumnos;
 
-        inFile.open(this->filename, ios::binary);
+        inFile.open(this->filename, ios::in | ios::binary);
         if (inFile.is_open())
         {
             Alumno temp;
@@ -127,18 +134,18 @@ public:
 
     void add(Alumno record)
     {
-        ofstream outFile(this->filename, ios::out | ios::binary);
+        ofstream outFile(this->filename, ios::app | ios::binary);
 
-        outFile.write((char *)&record, sizeof(Alumno));
-        outFile.close();
-        /*if (outFile.is_open())
+        // outFile.write((char *)&record, sizeof(Alumno));
+        if (outFile.is_open())
         {
             outFile << record;
             outFile.close();
         }
         else
             cerr << "No se pudo abrir el archivo.\n";
-            */
+
+        outFile.close();
     }
 
     Alumno readRecord(int pos)
@@ -164,11 +171,15 @@ public:
 int main()
 {
     FixedRecord fix("datos1.dat");
+    /*
+    vector<Alumno> alumnos = fix.load();
+    for (auto item : alumnos)
+        item.printAlumno();
+    Alumno readed = fix.readRecord(2);
+    readed.printAlumno();
+*/
     Alumno record;
-    readFromConsole(record.codigo, 5);
-    readFromConsole(record.nombre, 11);
-    readFromConsole(record.apellidos, 20);
-    readFromConsole(record.carrera, 15);
+    record.inputData();
     record.printAlumno();
     fix.add(record);
 }
