@@ -70,9 +70,15 @@ istream &operator>>(istream &stream, Alumno &p)
     stream.read((char *)&p.nombre, 11);
     stream.read((char *)&p.apellidos, 20);
     stream.read((char *)&p.carrera, 15);
+    char ciclo_array[5];
+    stream.read((char *)&ciclo_array, 5);
+    p.ciclo = atoi(ciclo_array);
+
+    char mensualidad_array[10];
+    stream.read((char *)&mensualidad_array, 10);
+    p.mensualidad = atof(mensualidad_array);
 
     // Dos .get() porque uno lee el salto de línea y otro lee el primer caracter.
-    stream.get();
     stream.get();
     return stream;
 }
@@ -109,6 +115,7 @@ public:
         this->filename = filename;
     }
 
+    // DONE, but FIXME
     vector<Alumno> load()
     {
         ifstream inFile;
@@ -132,6 +139,7 @@ public:
         return alumnos;
     }
 
+    // DONE
     void add(Alumno record)
     {
         ofstream outFile(this->filename, ios::app | ios::binary);
@@ -148,23 +156,46 @@ public:
         outFile.close();
     }
 
+    // DONE
     Alumno readRecord(int pos)
     {
-        ifstream file(this->filename, ios::app | ios::binary);
+        ifstream file(this->filename, ios::binary);
         if (!file.is_open())
             cout << "No se pudo abrir el archivo.\n";
         pos--;
+
         Alumno record;
-        cout << "Position in bytes: " << pos * sizeof(Alumno) << endl;
-        file.seekg((pos * sizeof(Alumno)) + (2 * pos), ios::beg); // fixed length record
+        int size_in_bytes = 0;
+
+        size_in_bytes += sizeof(record.codigo);
+        size_in_bytes += sizeof(record.nombre);
+        size_in_bytes += sizeof(record.apellidos);
+        size_in_bytes += sizeof(record.carrera);
+        size_in_bytes += 5;
+        size_in_bytes += 10;
+
+        file.seekg((size_in_bytes * pos) + (1 * pos), ios::beg); // fixed length record
         file.read((char *)&record.codigo, 5);
         file.read((char *)&record.nombre, 11);
         file.read((char *)&record.apellidos, 20);
         file.read((char *)&record.carrera, 15);
+
+        char ciclo_array[5];
+        file.read((char *)&ciclo_array, 5);
+        record.ciclo = atoi(ciclo_array);
+
+        char mensualidad_array[10];
+        file.read((char *)&mensualidad_array, 10);
+        record.mensualidad = atof(mensualidad_array);
+
         file.get();
         file.close();
 
         return record;
+    }
+
+    bool Delete(int pos)
+    {
     }
 };
 
@@ -172,14 +203,17 @@ int main()
 {
     FixedRecord fix("datos1.dat");
     /*
+    Alumno record;
+    record.inputData();
+    fix.add(record);
+
+     */
+    /*
     vector<Alumno> alumnos = fix.load();
     for (auto item : alumnos)
         item.printAlumno();
-    Alumno readed = fix.readRecord(2);
+        */
+
+    Alumno readed = fix.readRecord(4);
     readed.printAlumno();
-*/
-    Alumno record;
-    record.inputData();
-    record.printAlumno();
-    fix.add(record);
 }

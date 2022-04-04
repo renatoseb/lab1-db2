@@ -1,0 +1,4 @@
+Nombre|Apellidos|Carrera|Mensualidad
+Renato|Rodriguez Llanos|Ciencia de la Computacion|2000
+Valerie|Rodriguez Llanos|Ingenieria Ambiental|500
+Pedro|Castillo Perez|None|45999.398438
